@@ -10,7 +10,7 @@ export default function NotFoundPage() {
         Project Not Found
       </h1>
       <p className="text-xl text-gray-600 mb-6">
-        Sorry, we couldn't find the project you're looking for.
+        Sorry, we couldnt find the project youre looking for.
       </p>
       <Link
         href="/projects"

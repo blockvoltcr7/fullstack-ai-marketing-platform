@@ -10,4 +10,7 @@ export default function Loading() {
       </p>
     </div>
   );
+
+export default function loading() {
+  return <div></div>;
 }
