@@ -1,5 +1,3 @@
-Here is a detailed explanation of the provided Dockerfile, written in markdown format:
-
 ````markdown
 # Dockerfile Explanation
 
@@ -69,6 +67,12 @@ CMD ["poetry", "run", "asset-processing-service"]
 - In this case, it runs the command `poetry run asset-processing-service`, which likely starts the main service of the application, defined in the Python project.
 
 ---
+
+### 8. run the container
+
+```bash
+docker run -d -p 8000:8000 asset-processing-service
+```
 
 ### Summary
 
