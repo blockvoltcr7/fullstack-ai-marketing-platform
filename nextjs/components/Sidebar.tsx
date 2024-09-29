@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button"; // Ensure you import the Button component
+import { Button } from "@/components/ui/Button"; // Ensure you import the Button component
 import { X, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getMobileClasses, getDesktopClasses } from "@/utils/sidebarUtils";
+
 function Sidebar() {
   const [isMobile, setIsMobile] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -58,13 +60,17 @@ function Sidebar() {
       )}
 
       {/* Placeholder for storing all components in nav */}
-      <div>
-        <h1>AI Marketing Platform</h1>
-
-        {/* Placeholder for Sidebar content */}
-
-        {/* Placeholder for user profile from clerk */}
-      </div>
+      {(!isMobile || isOpen) && (
+        <div
+          className={cn(
+            "bg-gray-100 flex flex-col h-screen transition-transform duration-300 overflow-y-auto",
+            getMobileClasses({ isMobile, isOpen }),
+            getDesktopClasses({ isMobile, isCollapsed })
+          )}
+        >
+          <h1 className="text-2xl font-bold mb-10">AI Marketing Platform</h1>
+        </div>
+      )}
     </div>
   );
 }
