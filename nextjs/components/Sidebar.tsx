@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import SidebarNav from "./SidebarNav";
+import SidebarNav from "./SideBarNav";
 import SidebarToggle from "./SidebarToggle";
 
 // Define the breakpoint for mobile devices
