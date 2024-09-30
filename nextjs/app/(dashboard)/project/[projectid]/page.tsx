@@ -1,20 +1,16 @@
-"use client";
-
+import { notFound } from "next/navigation";
 import React from "react";
-import { useParams } from "next/navigation";
-import Sidebar from "@/components/Sidebar";
-// Define an interface for the params
-type Params = {
-  projectid: string;
-};
 
-export default function ProjectPage() {
-  const { projectid } = useParams<Params>();
+interface ProjectPageProps {
+  params: {
+    projectId: string;
+  };
+}
 
-  return (
-    <div className="flex flex-row">
-      <Sidebar />
-      <div className="flex-1">ProjectPage: {projectid}</div>
-    </div>
-  );
+export default function ProjectPage({ params }: ProjectPageProps) {
+  if (params.projectId != "123") {
+    return notFound();
+  }
+
+  return <div>ProjectPage: {params.projectId}</div>;
 }
