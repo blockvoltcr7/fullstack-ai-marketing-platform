@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SidebarNav from "./SideBarNav";
 import SidebarToggle from "./SidebarToggle";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 
 // Define the breakpoint for mobile devices
 const MOBILE_WINDOW_WIDTH_LIMIT = 1024;
@@ -184,7 +185,14 @@ function Sidebar() {
           </div>
 
           {/* Placeholder for user profile */}
-          <div>{/* TODO: User profile from clerk */}</div>
+          <div>
+            <SignedOut>
+              <SignInButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+          </div>
 
           {/* Desktop sidebar toggle */}
           {!isMobile && (
