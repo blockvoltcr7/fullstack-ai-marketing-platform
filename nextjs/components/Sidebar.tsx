@@ -45,11 +45,6 @@ function Sidebar() {
    *   and ensures the sidebar is not collapsed by setting `isCollapsed` to false.
    * - If the window width is greater than or equal to the limit, it sets
    *   `isOpen` to false, closing the sidebar if it was open.
-   *
-   * The effect also sets `isMounted` to true to indicate that the component
-   * has been mounted and is ready for interaction. The cleanup function
-   * removes the event listener when the component unmounts to prevent memory
-   * leaks and ensure optimal performance.
    */
   useEffect(() => {
     const handleResize = () => {
