@@ -6,7 +6,8 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SidebarNav from "./SideBarNav";
 import SidebarToggle from "./SidebarToggle";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
+import UserProfileSection from "./UserProfileSection";
 
 // Define the breakpoint for mobile devices
 const MOBILE_WINDOW_WIDTH_LIMIT = 1024;
@@ -21,10 +22,12 @@ const MOBILE_WINDOW_WIDTH_LIMIT = 1024;
  */
 function Sidebar() {
   // State variables
-  const [isMobile, setIsMobile] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+
+  const { isSignedIn } = useUser();
+
   // useRef is a React hook that returns a mutable ref object whose .current property is initialized to the passed argument (in this case, null).
   // It can be used to access a DOM element directly, allowing for imperative actions such as focusing an input or measuring the size of an element.
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -60,7 +63,6 @@ function Sidebar() {
     };
 
     handleResize();
-    setIsMounted(true);
     window.addEventListener("resize", handleResize);
 
     return () => {
@@ -126,11 +128,6 @@ function Sidebar() {
     return isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />;
   };
 
-  // Don't render anything until the component is mounted
-  if (!isMounted) {
-    return null;
-  }
-
   return (
     <div>
       {/* Mobile toggle button */}
@@ -185,14 +182,11 @@ function Sidebar() {
           </div>
 
           {/* Placeholder for user profile */}
-          <div>
-            <SignedOut>
-              <SignInButton />
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </div>
+          <div></div>
+
+          {isSignedIn && (
+            <UserProfileSection isMobile={isMobile} isCollapsed={isCollapsed} />
+          )}
 
           {/* Desktop sidebar toggle */}
           {!isMobile && (
