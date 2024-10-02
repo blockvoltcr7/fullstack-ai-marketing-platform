@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
 
 // Configure the Poppins font with specific weights and display settings
 const poppins = Poppins({
@@ -24,13 +25,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // Set the language for the entire application
-    <html lang="en">
-      {/* Apply the Poppins font variable and sans-serif font family to the body */}
-      <body className={`${poppins.variable} font-sans`}>
-        {/* Render the child components (page content) within the layout */}
-        {children}
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        {/* Apply the Poppins font variable and sans-serif font family to the body */}
+        <body className={`${poppins.variable} font-sans`}>
+          {/* Render the child components (page content) within the layout */}
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
