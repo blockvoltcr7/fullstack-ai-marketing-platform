@@ -14,19 +14,13 @@ export async function createProject() {
   }
 
   // Create project in database
-  const now = new Date();
-
-  const [newProject] = await db
+  await db
     .insert(projectsTable)
     .values({
       title: "New Project",
       userId,
-      createdAt: now,
-      updatedAt: now,
     })
     .returning();
-
-  return newProject;
 
   // TODO: LATER - redirect to detail view
   // redirect -> `/project/${newProject.id}`;

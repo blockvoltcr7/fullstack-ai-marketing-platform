@@ -5,7 +5,7 @@ import {
   AlertDialogContent,
   AlertDialogFooter,
   AlertDialogHeader,
-} from "@/components/ui/alert-dialog";
+} from "./ui/alert-dialog";
 import {
   AlertDialogCancel,
   AlertDialogDescription,

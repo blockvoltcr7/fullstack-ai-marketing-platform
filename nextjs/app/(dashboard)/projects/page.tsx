@@ -8,12 +8,6 @@ import React from "react";
 export default async function ProjectsPage() {
   const projects = await getProjectsForUser();
 
-  // Create a wrapper function for createProject that matches the expected type
-  const handleCreateProject = async () => {
-    "use server";
-    await createProject();
-  };
-
   return (
     <div className="w-full">
       <div className="max-w-screen-2xl mx-auto p-4 sm:p-6 md:p-8 lg:p-12 mt-2 space-y-6 sm:space-y-8 lg:space-y-10">
@@ -26,7 +20,7 @@ export default async function ProjectsPage() {
               Manage your Marketing projects effectively using AI
             </p>
           </div>
-          <form action={handleCreateProject} className="w-full sm:w-auto">
+          <form action={createProject} className="w-full sm:w-auto">
             <Button className="rounded-3xl text-base w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-1" strokeWidth={3} />
               New Project
