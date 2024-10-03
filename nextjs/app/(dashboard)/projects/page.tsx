@@ -7,7 +7,12 @@ import React from "react";
 
 export default async function ProjectsPage() {
   const projects = await getProjectsForUser();
-  await new Promise((resolve) => setTimeout(resolve, 10000));
+
+  // Create a wrapper function for createProject that matches the expected type
+  const handleCreateProject = async () => {
+    "use server";
+    await createProject();
+  };
 
   return (
     <div className="w-full">
@@ -21,7 +26,7 @@ export default async function ProjectsPage() {
               Manage your Marketing projects effectively using AI
             </p>
           </div>
-          <form action={createProject} className="w-full sm:w-auto">
+          <form action={handleCreateProject} className="w-full sm:w-auto">
             <Button className="rounded-3xl text-base w-full sm:w-auto">
               <Plus className="w-4 h-4 mr-1" strokeWidth={3} />
               New Project
