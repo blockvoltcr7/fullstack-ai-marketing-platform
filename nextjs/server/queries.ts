@@ -2,8 +2,16 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { db } from "./db";
-import { Project, projectsTable, Template, templatesTable } from "./db/schema";
+import {
+  Project,
+  projectsTable,
+  Template,
+  templatesTable,
+  subscriptionsTable,
+} from "./db/schema";
 import { eq } from "drizzle-orm";
+import Stripe from "stripe";
+import stripe from "@/lib/stripe";
 
 export function getProjectsForUser(): Promise<Project[]> {
   // Figure out who the user is
@@ -73,4 +81,40 @@ export async function getTemplate(id: string): Promise<Template | undefined> {
   });
 
   return template;
+}
+
+export async function getUserSubscription(): Promise<Stripe.Subscription | null> {
+  const { userId } = auth();
+  if (!userId) {
+    throw new Error("User not found");
+  }
+
+  try {
+    const subscription = await db.query.subscriptionsTable.findFirst({
+      where: eq(subscriptionsTable.userId, userId),
+    });
+
+    if (!subscription) {
+      console.log("No stripe subscription found for user", userId);
+      return null;
+    }
+
+    const stripeSubscription = await stripe.subscriptions.retrieve(
+      subscription.stripeSubscriptionId
+    );
+
+    return stripeSubscription;
+  } catch (error) {
+    // If the subscription doesn't exist or there's an error, log it and return null
+    if (
+      error instanceof Stripe.errors.StripeError &&
+      error.code === "resource_missing"
+    ) {
+      console.log("Subscription not found in Stripe.");
+      return null;
+    }
+
+    console.error("Error fetching subscription from Stripe:", error);
+    throw new Error("Failed to retrieve subscription details.");
+  }
 }

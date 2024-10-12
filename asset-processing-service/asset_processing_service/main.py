@@ -1,3 +1,20 @@
+"""
+This module implements an asynchronous job processing system for asset processing.
+
+The system consists of a job fetcher that continuously retrieves jobs from an API,
+and multiple workers that process these jobs concurrently. It handles job status
+updates, retries failed jobs, and manages stuck jobs.
+
+Key components:
+1. job_fetcher: Fetches jobs and manages their statuses.
+2. worker: Processes individual jobs.
+3. async_main: Sets up and coordinates the job fetcher and workers.
+4. main: Entry point that runs the async_main function.
+
+The system uses asyncio for concurrent operations and implements error handling
+and logging throughout.
+"""
+
 import asyncio
 from collections import defaultdict
 from datetime import datetime
@@ -8,6 +25,19 @@ from asset_processing_service.logger import logger
 from asset_processing_service.job_processor import process_job
 
 async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set):
+    """
+    Continuously fetches jobs from the API and manages their statuses.
+
+    This function:
+    1. Fetches jobs from the API.
+    2. Checks for stuck jobs and marks them as failed.
+    3. Adds new or failed jobs to the queue for processing.
+    4. Handles jobs that have exceeded the maximum number of attempts.
+
+    Args:
+        job_queue (asyncio.Queue): Queue to add jobs for processing.
+        jobs_pending_or_in_progress (set): Set of job IDs currently being processed or pending.
+    """
     while True:
         try:
             current_time = datetime.now().timestamp()          
@@ -56,6 +86,21 @@ async def worker(
         jobs_pending_or_in_progress: set,
         job_locks: dict
     ):
+    """
+    Processes jobs from the queue.
+
+    This function:
+    1. Retrieves jobs from the queue.
+    2. Processes each job using the process_job function.
+    3. Handles errors during job processing.
+    4. Updates job status and manages the jobs_pending_or_in_progress set.
+
+    Args:
+        worker_id (int): Unique identifier for the worker.
+        job_queue (asyncio.Queue): Queue to retrieve jobs from.
+        jobs_pending_or_in_progress (set): Set of job IDs currently being processed or pending.
+        job_locks (dict): Dictionary of locks for each job to ensure thread-safety.
+    """
     while True:
         try: 
             job = await job_queue.get()
@@ -85,6 +130,15 @@ async def worker(
             await asyncio.sleep(3)
 
 async def async_main():
+    """
+    Sets up and coordinates the job processing system.
+
+    This function:
+    1. Creates a job queue and sets for tracking jobs.
+    2. Initializes the job fetcher task.
+    3. Creates multiple worker tasks.
+    4. Runs all tasks concurrently.
+    """
     job_queue = asyncio.Queue()
     jobs_pending_or_in_progress = set()
     job_locks = defaultdict(asyncio.Lock)
@@ -103,6 +157,11 @@ async def async_main():
     await asyncio.gather(job_fetcher_task, *workers)
 
 def main():
+    """
+    Entry point of the application.
+
+    This function runs the async_main function using asyncio.run().
+    """
     asyncio.run(async_main())
 
 if __name__ == "__main__":
