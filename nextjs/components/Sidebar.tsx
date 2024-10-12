@@ -9,7 +9,6 @@ import SidebarToggle from "@/components/SidebarToggle";
 import { useUser } from "@clerk/nextjs";
 import UserProfileSection from "@/components/UserProfileSection";
 
-
 const MOBILE_WINDOW_WIDTH_LIMIT = 1024;
 
 function Sidebar() {
