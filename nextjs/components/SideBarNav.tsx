@@ -29,11 +29,11 @@ function SidebarNav({ isMobile, isCollapsed }: SidebarNavProps) {
         pathname === "/projects" || pathname.startsWith("/project/"),
     },
     {
-      href: "/templatess",
-      label: "Templatess",
+      href: "/templates",
+      label: "Templates",
       icon: LayoutDashboard,
       isActive: (pathname) =>
-        pathname === "/templatess" || pathname.startsWith("/template/"),
+        pathname === "/templates" || pathname.startsWith("/template/"),
     },
     {
       href: "/settings",
