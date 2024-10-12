@@ -1,6 +1,7 @@
 # Use an official Python runtime as a parent image
 FROM python:3.9-slim
 
+# Update local system and Install ffmpeg
 RUN apt-get update && apt-get install -y ffmpeg 
 
 # Set the working directory in the container
