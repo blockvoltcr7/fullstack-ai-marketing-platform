@@ -11,7 +11,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "target": "ES6",
     "incremental": true,
     "plugins": [
       {

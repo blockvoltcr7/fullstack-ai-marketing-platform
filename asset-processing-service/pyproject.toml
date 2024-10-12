@@ -2,17 +2,21 @@
 name = "asset-processing-service"
 version = "0.1.0"
 description = ""
-authors = ["sami sabir-idrissi <samisabiridrissi@icloud.com>"]
+authors = ["Brandon Hancock <brandon@brandonhancock.io>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
-
-[tool.poetry.dev-dependencies]
-pytest = "^7.4.3"
+python = "^3.9"
+aiohttp = "^3.10.5"
+python-dotenv = "^1.0.1"
+pydantic = "^2.9.2"
+ffmpeg-python = "^0.2.0"
+openai = "^1.47.0"
+tiktoken = "^0.7.0"
 
 [tool.poetry.scripts]
 asset-processing-service = "asset_processing_service.main:main"
+
 
 [build-system]
 requires = ["poetry-core"]

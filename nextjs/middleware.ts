@@ -1,36 +1,61 @@
-/**
- * This middleware file is used in Next.js applications to handle requests
- * before they reach the actual route handlers. Middleware can be used for
- * various purposes such as authentication, logging, and modifying requests
- * or responses. In this case, we are using Clerk's middleware to manage
- * authentication and user sessions.
- */
-
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-//TODO: add public and private routes
-const isPublicRoute = createRouteMatcher(["/", "/pricing"]);
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/pricing",
+  "/api/upload",
+  "/api/webhooks/stripe",
+]);
 
-// Custom middleware logic
+const isSecureRoute = createRouteMatcher([
+  "/api/asset-processing-job",
+  "/api/asset",
+]);
+
+const SERVER_API_KEY = process.env.SERVER_API_KEY;
+
+if (!SERVER_API_KEY) {
+  throw new Error("SERVER_API_KEY is not set in the environment variables");
+}
+
 export default clerkMiddleware((auth, request) => {
-  // if a user is not authenticated and they are trying to access a private route, redirect them to the clerk login page
+  // Check for secure API routes (service worker only)
+  if (isSecureRoute(request)) {
+    return checkServiceWorkerAuth(request);
+  }
+
+  // if a user is not authenticated and they are trying to
+  // access a private route, redirect them to the clerk login page
   if (!auth().userId && !isPublicRoute(request)) {
     auth().protect();
   }
 });
 
-// Configuration for the middleware
 export const config = {
   matcher: [
-    // This regex pattern skips Next.js internal routes and all static files
-    // (like images, styles, and scripts) unless they are found in the search
-    // parameters. This is important to ensure that the middleware does not
-    // interfere with the loading of essential assets.
+    // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-
-    // This pattern ensures that the middleware always runs for API routes
-    // and TRPC (TypeScript Remote Procedure Call) routes, allowing for
-    // authentication checks on these endpoints.
+    // Always run for API routes
     "/(api|trpc)(.*)",
   ],
 };
+
+function checkServiceWorkerAuth(request: Request) {
+  const authHeader = request.headers.get("Authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return new NextResponse(
+      JSON.stringify({ error: "Missing or invalid Authorization header" }),
+      { status: 401 }
+    );
+  }
+
+  const token = authHeader.split(" ")[1];
+  if (token !== SERVER_API_KEY) {
+    return new NextResponse(JSON.stringify({ error: "Invalid API key" }), {
+      status: 403,
+    });
+  }
+
+  return NextResponse.next();
+}
