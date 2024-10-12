@@ -2,15 +2,38 @@ import asyncio
 import os
 import shutil
 import tempfile
-from typing import List
 import uuid
-import ffmpeg
-from openai import OpenAI
+from typing import List
 
+import ffmpeg
 from asset_processing_service.config import config
 from asset_processing_service.logger import logger
+from openai import OpenAI
 
-async def split_audio_file(audio_buffer: bytes, max_chunk_size_bytes: int, original_file_name: str):
+"""
+This module contains functions for processing audio and video files.
+It includes functionality for splitting audio files, converting audio formats,
+extracting audio from video, and transcribing audio chunks.
+"""
+
+
+async def split_audio_file(
+    audio_buffer: bytes, max_chunk_size_bytes: int, original_file_name: str
+):
+    """
+    Splits an audio file into chunks of a specified maximum size.
+
+    Args:
+        audio_buffer (bytes): The audio file content as bytes.
+        max_chunk_size_bytes (int): Maximum size of each chunk in bytes.
+        original_file_name (str): Original name of the audio file.
+
+    Returns:
+        List[dict]: A list of dictionaries containing chunk data, size, and file name.
+
+    Raises:
+        ValueError: If a chunk exceeds the maximum size after splitting.
+    """
     file_name_without_ext, file_extension = os.path.splitext(original_file_name)
     chunks = []
     temp_dir = tempfile.mkdtemp()
@@ -38,7 +61,7 @@ async def split_audio_file(audio_buffer: bytes, max_chunk_size_bytes: int, origi
         total_size = int(format_info.get("size", 0))
         duration = float(format_info.get("duration", 0.0))
 
-         # Calculate the number of chunks needed
+        # Calculate the number of chunks needed
         num_chunks = max(
             1, int((total_size + max_chunk_size_bytes - 1) // max_chunk_size_bytes)
         )
@@ -46,14 +69,15 @@ async def split_audio_file(audio_buffer: bytes, max_chunk_size_bytes: int, origi
         # Calculate chunk duration
         chunk_duration = duration / num_chunks
 
-
         logger.info(f"Total size: {total_size}")
         logger.info(f"Duration: {duration}")
-        logger.info(f"Splitting into {num_chunks} chunks of {chunk_duration} seconds each.")
+        logger.info(
+            f"Splitting into {num_chunks} chunks of {chunk_duration} seconds each."
+        )
 
         # Split the audio file into chunks
         output_pattern = os.path.join(
-            temp_dir, f"{file_name_without_ext}_chunk_%03d.mp3" 
+            temp_dir, f"{file_name_without_ext}_chunk_%03d.mp3"
         )
         split_cmd = ffmpeg.input(temp_mp3_path).output(
             output_pattern,
@@ -97,18 +121,24 @@ async def split_audio_file(audio_buffer: bytes, max_chunk_size_bytes: int, origi
 
         return chunks
 
-
     except Exception as e:
         logger.error(f"Error splitting audio file: {e}")
         raise
     finally:
         # Clean up temporary files
         shutil.rmtree(temp_dir)
-    
-    
+
+
 async def convert_audio_to_mp3(input_path: str, output_path: str):
     """
     Converts an audio file to MP3 format.
+
+    Args:
+        input_path (str): Path to the input audio file.
+        output_path (str): Path where the converted MP3 file will be saved.
+
+    Raises:
+        ffmpeg.Error: If there's an error during the conversion process.
     """
     try:
         # Use FFmpeg to convert the audio file to MP3
@@ -131,7 +161,23 @@ async def convert_audio_to_mp3(input_path: str, output_path: str):
         raise
 
 
-async def extract_audio_and_split(video_buffer: bytes, max_chunk_size_bytes: int, original_file_name: str):
+async def extract_audio_and_split(
+    video_buffer: bytes, max_chunk_size_bytes: int, original_file_name: str
+):
+    """
+    Extracts audio from a video file and splits it into chunks.
+
+    Args:
+        video_buffer (bytes): The video file content as bytes.
+        max_chunk_size_bytes (int): Maximum size of each audio chunk in bytes.
+        original_file_name (str): Original name of the video file.
+
+    Returns:
+        List[dict]: A list of dictionaries containing audio chunk data, size, and file name.
+
+    Raises:
+        Exception: If there's an error during audio extraction or splitting.
+    """
     temp_dir = os.path.join(os.getcwd(), "temp", str(uuid.uuid4()))
     os.makedirs(temp_dir, exist_ok=True)
 
@@ -143,7 +189,6 @@ async def extract_audio_and_split(video_buffer: bytes, max_chunk_size_bytes: int
     try:
         with open(input_file, "wb") as f:
             f.write(video_buffer)
-
 
         # Use ffmpeg-python instead of subprocess
         stream = ffmpeg.input(input_file)
@@ -170,9 +215,35 @@ async def extract_audio_and_split(video_buffer: bytes, max_chunk_size_bytes: int
         # Clean up temporary files
         shutil.rmtree(temp_dir)
 
+
 async def transcribe_chunks(chunks: List[dict]) -> List[str]:
+    """
+    Transcribes a list of audio chunks using OpenAI's Whisper model.
+
+    Args:
+        chunks (List[dict]): A list of dictionaries containing audio chunk data.
+
+    Returns:
+        List[str]: A list of transcribed texts, one for each chunk.
+
+    Raises:
+        Exception: If there's an error during the transcription process.
+    """
 
     async def transcribe_chunk(index: int, chunk: dict) -> dict:
+        """
+        Transcribes a single audio chunk.
+
+        Args:
+            index (int): The index of the chunk in the original list.
+            chunk (dict): A dictionary containing the chunk data.
+
+        Returns:
+            dict: A dictionary with the chunk index and transcribed content.
+
+        Raises:
+            Exception: If there's an error during the transcription process.
+        """
         try:
             logger.info(
                 f"Starting transcription for chunk {index}: {chunk['file_name']}"
@@ -189,7 +260,7 @@ async def transcribe_chunks(chunks: List[dict]) -> List[str]:
             with open(temp_file_path, "rb") as audio_file:
                 # Call OpenAI transcription API to use Whisper
                 client = OpenAI()
-                transcription =  client.audio.transcriptions.create(
+                transcription = client.audio.transcriptions.create(
                     model=config.OPENAI_MODEL, file=audio_file
                 )
 
@@ -211,7 +282,6 @@ async def transcribe_chunks(chunks: List[dict]) -> List[str]:
             logger.error(f"Error transcribing chunk {index}: {e}")
             raise
 
-
     logger.info("Starting transcription of audio chunks.")
     tasks = [transcribe_chunk(index, chunk) for index, chunk in enumerate(chunks)]
 
@@ -222,11 +292,9 @@ async def transcribe_chunks(chunks: List[dict]) -> List[str]:
     transcribed_chunks.sort(key=lambda x: x["index"])
     logger.info("Transcribed chunks sorted by original indices.")
 
-     # Extract the 'content' from the sorted results
+    # Extract the 'content' from the sorted results
     transcribed_texts = [chunk["content"] for chunk in transcribed_chunks]
 
     logger.info("Transcription content extracted from transcribed chunks: ")
 
     return transcribed_texts
-
-
