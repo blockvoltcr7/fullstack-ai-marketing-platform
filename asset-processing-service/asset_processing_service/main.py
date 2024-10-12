@@ -21,8 +21,9 @@ from datetime import datetime
 
 from asset_processing_service.api_client import fetch_jobs, update_job_details
 from asset_processing_service.config import config
-from asset_processing_service.logger import logger
 from asset_processing_service.job_processor import process_job
+from asset_processing_service.logger import logger
+
 
 async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set):
     """
@@ -40,7 +41,7 @@ async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set
     """
     while True:
         try:
-            current_time = datetime.now().timestamp()          
+            current_time = datetime.now().timestamp()
             logger.info(f"Fetching jobs: {current_time}")
             jobs = await fetch_jobs()
 
@@ -48,25 +49,35 @@ async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set
                 if job.status == "in_progress" and job.lastHeartBeat:
                     last_heartbeat_time = job.lastHeartBeat.timestamp()
                     time_since_last_heartbeat = abs(current_time - last_heartbeat_time)
-                    logger.info(f"Time since last heartbeat for job {job.id}: {time_since_last_heartbeat}")
+                    logger.info(
+                        f"Time since last heartbeat for job {job.id}: {time_since_last_heartbeat}"
+                    )
 
                     if time_since_last_heartbeat > config.STUCK_JOB_THRESHOLD_SECONDS:
                         logger.info(f"Job {job.id} is stuck. Failing job.")
-                        await update_job_details(job.id, {
-                            "status": "failed",
-                            "errorMessage": "Job is stuck - no heartbeat received recently",
-                            "attempts": job.attempts + 1
-                        })
+                        await update_job_details(
+                            job.id,
+                            {
+                                "status": "failed",
+                                "errorMessage": "Job is stuck - no heartbeat received recently",
+                                "attempts": job.attempts + 1,
+                            },
+                        )
                         if job.id in jobs_pending_or_in_progress:
                             jobs_pending_or_in_progress.remove(job.id)
-                
+
                 elif job.status in ["created", "failed"]:
                     if job.attempts >= config.MAX_JOB_ATTEMPTS:
-                        logger.info(f"Job {job.id} has exceeded max attempts. Failing job.")
-                        await update_job_details(job.id, {
-                            "status": "max_attempts_exceeded",
-                            "errorMessage": "Max attempts exceeded"
-                        })
+                        logger.info(
+                            f"Job {job.id} has exceeded max attempts. Failing job."
+                        )
+                        await update_job_details(
+                            job.id,
+                            {
+                                "status": "max_attempts_exceeded",
+                                "errorMessage": "Max attempts exceeded",
+                            },
+                        )
 
                     elif job.id not in jobs_pending_or_in_progress:
                         logger.info(f"Adding job to queue: {job.id}")
@@ -81,11 +92,11 @@ async def job_fetcher(job_queue: asyncio.Queue, jobs_pending_or_in_progress: set
 
 
 async def worker(
-        worker_id: int,
-        job_queue: asyncio.Queue,
-        jobs_pending_or_in_progress: set,
-        job_locks: dict
-    ):
+    worker_id: int,
+    job_queue: asyncio.Queue,
+    jobs_pending_or_in_progress: set,
+    job_locks: dict,
+):
     """
     Processes jobs from the queue.
 
@@ -102,7 +113,7 @@ async def worker(
         job_locks (dict): Dictionary of locks for each job to ensure thread-safety.
     """
     while True:
-        try: 
+        try:
             job = await job_queue.get()
 
             async with job_locks[job.id]:
@@ -129,6 +140,7 @@ async def worker(
             logger.error(f"Error in worker {worker_id}: {e}")
             await asyncio.sleep(3)
 
+
 async def async_main():
     """
     Sets up and coordinates the job processing system.
@@ -143,18 +155,19 @@ async def async_main():
     jobs_pending_or_in_progress = set()
     job_locks = defaultdict(asyncio.Lock)
 
-    job_fetcher_task = asyncio.create_task(job_fetcher(job_queue, jobs_pending_or_in_progress))
+    job_fetcher_task = asyncio.create_task(
+        job_fetcher(job_queue, jobs_pending_or_in_progress)
+    )
 
-    workers = [asyncio.create_task(
-        worker(
-            i + 1, 
-            job_queue,
-            jobs_pending_or_in_progress, 
-            job_locks)
-        ) 
-        for i in range(config.MAX_NUM_WORKERS)]
+    workers = [
+        asyncio.create_task(
+            worker(i + 1, job_queue, jobs_pending_or_in_progress, job_locks)
+        )
+        for i in range(config.MAX_NUM_WORKERS)
+    ]
 
     await asyncio.gather(job_fetcher_task, *workers)
+
 
 def main():
     """
@@ -163,6 +176,7 @@ def main():
     This function runs the async_main function using asyncio.run().
     """
     asyncio.run(async_main())
+
 
 if __name__ == "__main__":
     main()
