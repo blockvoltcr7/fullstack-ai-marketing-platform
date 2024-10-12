@@ -102,8 +102,8 @@ function Sidebar() {
             isMobile
               ? ""
               : isCollapsed
-              ? "w-28 h-screen sticky top-0"
-              : "w-64 h-screen sticky top-0"
+                ? "w-28 h-screen sticky top-0"
+                : "w-64 h-screen sticky top-0"
           )}
         >
           <div
