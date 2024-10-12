@@ -5,9 +5,9 @@ import { Button } from "./ui/button";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import SidebarNav from "./SidebarNav";
-import SidebarToggle from "./SidebarToggle";
+import SidebarToggle from "@/components/SidebarToggle";
 import { useUser } from "@clerk/nextjs";
-import UserProfileSection from "./UserProfileSection";
+import UserProfileSection from "@/components/UserProfileSection";
 
 const MOBILE_WINDOW_WIDTH_LIMIT = 1024;
 
