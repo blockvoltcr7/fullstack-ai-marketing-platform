@@ -1,0 +1,66 @@
+# .cursorrules
+
+## Project Overview
+- This is a full-stack application built with Next.js, TypeScript, and React.
+- The project uses Vercel for deployment and integrates the Vercel AI SDK.
+- Database management is handled by Drizzle ORM with PostgreSQL on Vercel.
+- UI components are built using shadcn/ui and Aceternity UI.
+- Authentication is managed by Clerk.
+
+## General Guidelines
+1. Prioritize TypeScript and Next.js best practices in all code suggestions and implementations.
+2. Provide expert guidance on deploying applications to Vercel, especially those integrating AI capabilities.
+3. Demonstrate proficiency in using the Vercel AI SDK for AI-integrated applications.
+4. Adhere to React best practices and modern patterns (e.g., hooks, functional components).
+5. Follow Next.js conventions for routing, API routes, and server-side rendering.
+
+## Code Style and Conventions
+1. Use TypeScript for all code, ensuring proper type definitions and interfaces.
+2. Follow ESLint and Prettier configurations for consistent code formatting.
+3. Use meaningful variable and function names that clearly describe their purpose.
+4. Prefer arrow functions for functional components and callbacks.
+5. Utilize Next.js 13+ features like the App Router when applicable.
+
+## Security Considerations
+1. Never hard-code secrets, passwords, or sensitive information in the codebase.
+2. Suggest using environment variables for all sensitive configurations.
+3. Recommend proper error handling to avoid exposing sensitive information in logs or responses.
+
+## Database and ORM
+1. Provide recommendations on Drizzle ORM best practices for PostgreSQL on Vercel.
+2. Suggest efficient query patterns and optimizations for database operations.
+3. Advise on proper schema design and migration strategies using Drizzle.
+
+## UI Development
+1. Prioritize the use of shadcn/ui and Aceternity UI components for consistent design.
+2. Suggest responsive design patterns and accessibility improvements.
+3. Recommend efficient state management solutions (e.g., React Context, Zustand) when necessary.
+
+## Authentication
+1. Implement Clerk authentication following best practices and official documentation.
+2. Ensure proper integration between Clerk authentication and user data stored in the PostgreSQL database via Drizzle.
+3. Suggest secure patterns for managing user sessions and protected routes.
+
+## Project Structure
+1. Follow Next.js recommended folder structure:
+   - `/app` for routing and page components
+   - `/components` for reusable UI components
+   - `/lib` for utility functions and shared logic
+   - `/styles` for global styles and CSS modules
+   - `/public` for static assets
+2. Use appropriate file naming conventions:
+   - PascalCase for component files (e.g., `UserProfile.tsx`)
+   - camelCase for utility functions and hooks (e.g., `useAuth.ts`)
+   - kebab-case for CSS modules (e.g., `user-profile.module.css`)
+
+## Performance Optimization
+1. Suggest code-splitting and lazy loading techniques where appropriate.
+2. Recommend proper use of Next.js Image component for optimized image loading.
+3. Advise on efficient data fetching strategies using SWR or React Query.
+
+## Vercel Deployment
+1. Provide guidance on optimizing the application for Vercel deployment.
+2. Suggest proper usage of Vercel's serverless functions and edge computing features.
+3. Recommend strategies for efficient CI/CD pipelines on Vercel.
+
+Remember to continuously update and refine these rules as the project evolves and new best practices emerge in the ecosystem.
