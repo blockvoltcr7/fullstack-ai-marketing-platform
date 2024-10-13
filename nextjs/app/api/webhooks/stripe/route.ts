@@ -1,10 +1,13 @@
 import stripe from "@/lib/stripe";
+import config from "@/lib/config";
 import { db } from "@/server/db";
 import { subscriptionsTable } from "@/server/db/schema";
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+// Use the webhook secret from config instead of directly from process.env
+const webhookSecret = config.stripeWebhookSecret;
+console.log(`Webhook secret: ${webhookSecret}`);
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -15,7 +18,7 @@ export async function POST(req: Request) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret!);
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err) {
     console.error(`Webhook signature verification failed.`, err);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
@@ -45,6 +48,9 @@ export async function POST(req: Request) {
 
 async function handleNewSubscription(subscription: Stripe.Subscription) {
   console.log(`Processing new subscription: ${subscription.id}`);
+
+  let userId: string | undefined; // Declare userId outside the try block
+
   try {
     // Retrieve the customer
     const customer = await stripe.customers.retrieve(
@@ -58,7 +64,7 @@ async function handleNewSubscription(subscription: Stripe.Subscription) {
       throw new Error(`Customer ${subscription.customer} has been deleted`);
     }
 
-    const userId = customer.metadata.userId;
+    userId = customer.metadata.userId;
     console.log(`User ID: ${userId}`);
 
     if (!userId) {
@@ -70,10 +76,14 @@ async function handleNewSubscription(subscription: Stripe.Subscription) {
       stripeSubscriptionId: subscription.id,
     };
 
+    console.log(`Inserting subscription record for user ${userId}`);
     await db.insert(subscriptionsTable).values(subscriptionData).execute();
     console.log(`Inserted subscription record for user ${userId}`);
   } catch (error) {
-    console.error(`Error processing new subscription: ${error}`);
+    console.log(
+      `Error processing new subscription for: ${userId || "unknown user"}`
+    );
+    console.error(`Error processing new subscription:`, error);
     throw error;
   }
 }
