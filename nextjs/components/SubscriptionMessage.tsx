@@ -1,14 +1,27 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
-import { Box, Star, LayoutTemplate, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+/**
+ * SubscriptionMessage Component Overview:
+ *
+ * The SubscriptionMessage component displays a promotional message encouraging users to subscribe
+ * to premium features of the platform. It utilizes various UI components for layout and styling,
+ * and provides a clear call to action for users to subscribe.
+ */
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Importing UI components for card layout
+import Link from "next/link"; // Importing Link for client-side navigation
+import { Box, Star, LayoutTemplate, Sparkles } from "lucide-react"; // Importing icons for visual representation
+import { Button } from "@/components/ui/button"; // Importing Button component for actions
+
+// SubscriptionMessage Component
 export default function SubscriptionMessage() {
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 z-10 p-4 sm:p-6 md:p-8">
+      {/* Card component for the subscription message */}
       <Card className="p-4 sm:p-6 w-full max-w-[90%] sm:max-w-md border-2 border-main bg-[#f0f8ff] rounded-3xl shadow-lg relative overflow-hidden">
+        {/* Decorative elements for visual appeal */}
         <div className="absolute top-0 right-0 w-16 sm:w-20 md:w-24 h-16 sm:h-20 md:h-24 bg-main opacity-10 rounded-full -mr-8 sm:-mr-10 md:-mr-12 -mt-8 sm:-mt-10 md:-mt-12"></div>
         <div className="absolute bottom-0 left-0 w-12 sm:w-14 md:w-16 h-12 sm:h-14 md:h-16 bg-main opacity-10 rounded-full -ml-6 sm:-ml-7 md:-ml-8 -mb-6 sm:-mb-7 md:-mb-8"></div>
+
+        {/* Card header with title */}
         <CardHeader>
           <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold text-center text-main flex items-center justify-center space-x-2">
             <Sparkles
@@ -18,11 +31,14 @@ export default function SubscriptionMessage() {
             <span className="whitespace-nowrap">Unlock Premium Features</span>
           </CardTitle>
         </CardHeader>
+
+        {/* Card content with features and subscribe button */}
         <CardContent className="flex flex-col items-center space-y-4 sm:space-y-6 relative z-10">
           <p className="text-center text-gray-700 text-sm sm:text-base">
             Elevate your projects with our AI-powered platform.
           </p>
           <ul className="space-y-2 sm:space-y-3 w-full">
+            {/* List of premium features */}
             {[
               { icon: Star, text: "Unlimited Projects" },
               { icon: LayoutTemplate, text: "Unlimited Templates" },
@@ -39,6 +55,7 @@ export default function SubscriptionMessage() {
               </li>
             ))}
           </ul>
+          {/* Subscribe button */}
           <Button
             asChild
             className="w-full bg-main text-white hover:bg-main/90 transform transition-all duration-300 shadow-md text-sm sm:text-base py-2 sm:py-3"

@@ -3,3 +3,9 @@
 .env
 
 __pycache__/
+# Ignore unnecessary files and directories
+.git
+__pycache__
+.pytest_cache
+.vscode
+.venv

@@ -1,3 +1,35 @@
+// Start of Selection
+/**
+ * SubscriptionManager Component Overview:
+ *
+ * The SubscriptionManager component serves as the primary interface for managing user subscriptions.
+ * It performs the following key functions:
+ *
+ * 1. **Initial Mounting**: Handles the initial rendering and sets up state management.
+ * 2. **URL Parameter Processing**: Processes URL parameters to display success or cancellation messages.
+ *
+ * 3. **Subscription Status Display**:
+ *    - For **Active Subscribers**: Shows current plan details and a button to manage the subscription.
+ *    - For **Non-Subscribers**: Displays free plan status, subscription features, and a button to subscribe.
+ *
+ * 4. **State Management**: Utilizes hooks such as `useState` for local state management and `useRouter` for navigation.
+ *
+ * 5. **Stripe API Interaction**: Interacts with Stripe API endpoints for creating checkout sessions and managing subscriptions.
+ *
+ * 6. **User Feedback**: Implements toast notifications to provide feedback on subscription actions.
+ *
+ * 7. **Responsive Design**: Incorporates responsive design classes to ensure usability across different screen sizes.
+ *
+ * 8. **Helper Functions**: Utilizes helper functions like `getSubscriptionStatus` and `formatDate` for formatting and displaying subscription information.
+ *
+ * This component offers a comprehensive interface for users to:
+ * - View their subscription status
+ * - Manage existing subscriptions
+ * - Subscribe to new plans
+ *
+ * All while effectively handling necessary API interactions and providing appropriate user feedback.
+ */
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -7,21 +39,41 @@ import { Box, LayoutTemplate, Star } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
 
+/**
+ * Interface for the props of the SubscriptionManager component.
+ * @property {Stripe.Subscription | null} subscription - The user's current subscription status.
+ */
 interface SubscriptionManagerProps {
   subscription: Stripe.Subscription | null;
 }
 
+/**
+ * SubscriptionManager Component
+ *
+ * This component manages the display and interaction for user subscriptions.
+ * It handles subscription status, checkout process, and displays relevant information.
+ *
+ * @param {SubscriptionManagerProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered SubscriptionManager component.
+ */
 function SubscriptionManager({ subscription }: SubscriptionManagerProps) {
+  // State to track if the component has mounted to handle effects correctly
   const [isMounted, setIsMounted] = useState(false);
+
+  // Hook to access the current URL search parameters
   const searchParams = useSearchParams();
+
+  // Hook to programmatically navigate between routes
   const router = useRouter();
 
   console.log("Subscription", subscription);
 
+  // Set isMounted to true after initial render
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // Handle subscription success or cancellation messages
   useEffect(() => {
     if (!isMounted) return;
 
@@ -54,15 +106,25 @@ function SubscriptionManager({ subscription }: SubscriptionManagerProps) {
 
 export default SubscriptionManager;
 
+/**
+ * SubscriptionBody Component
+ *
+ * This component renders the main content of the subscription management page.
+ * It displays either the current subscription details or options to subscribe.
+ *
+ * @param {Object} props - The props for the component.
+ * @param {Stripe.Subscription | null} props.subscription - The user's current subscription status.
+ * @returns {JSX.Element} The rendered SubscriptionBody component.
+ */
 function SubscriptionBody({
   subscription,
 }: {
   subscription: Stripe.Subscription | null;
 }) {
   const [isLoading, setIsLoading] = useState(false);
-
   const router = useRouter();
 
+  // Handle the checkout process
   const handleCheckout = async () => {
     setIsLoading(true);
     try {
@@ -71,7 +133,11 @@ function SubscriptionBody({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create checkout session");
+        const errorData = await response.json();
+        console.error("Checkout session creation failed:", errorData);
+        throw new Error(
+          `Failed to create checkout session: ${errorData.error}`
+        );
       }
 
       const { url } = await response.json();
@@ -84,6 +150,7 @@ function SubscriptionBody({
     }
   };
 
+  // Handle opening the subscription management portal
   const handleManageSubscription = async () => {
     setIsLoading(true);
     try {
@@ -105,6 +172,7 @@ function SubscriptionBody({
     }
   };
 
+  // Render active subscription details
   if (subscription && subscription.status === "active") {
     return (
       <div className="space-y-4 sm:space-y-6">
@@ -132,6 +200,7 @@ function SubscriptionBody({
     );
   }
 
+  // Render subscription options for non-subscribed users
   return (
     <div className="space-y-6 sm:space-y-8">
       <div className="space-y-2 sm:space-y-3">
@@ -170,6 +239,12 @@ function SubscriptionBody({
   );
 }
 
+/**
+ * Get a formatted string representation of the subscription status.
+ *
+ * @param {Stripe.Subscription | null} subscription - The user's subscription object.
+ * @returns {string} A formatted string describing the subscription status.
+ */
 const getSubscriptionStatus = (
   subscription: Stripe.Subscription | null
 ): string => {
@@ -182,6 +257,12 @@ const getSubscriptionStatus = (
   );
 };
 
+/**
+ * Format a Unix timestamp into a YYYY-MM-DD date string.
+ *
+ * @param {number} timestamp - The Unix timestamp to format.
+ * @returns {string} A formatted date string in YYYY-MM-DD format.
+ */
 function formatDate(timestamp: number): string {
   const date = new Date(timestamp * 1000);
   const year = date.getFullYear();
