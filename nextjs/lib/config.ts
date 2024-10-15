@@ -4,6 +4,8 @@ interface Config {
   stripePublishableKey: string;
   stripeSecretKey: string;
   stripeWebhookSecret: string;
+  subscriptionPrice: number;
+  subscriptionCurrency: string;
 }
 
 const config: Config = {
@@ -24,6 +26,19 @@ const config: Config = {
     process.env.STRIPE_MODE === "test"
       ? process.env.STRIPE_WEBHOOK_SECRET_TEST!
       : process.env.STRIPE_WEBHOOK_SECRET!,
+  subscriptionPrice:
+    process.env.STRIPE_MODE === "test"
+      ? 0.0 // Test mode price
+      : 0.0, // Production mode price
+  subscriptionCurrency: "USD",
+};
+
+export const getSubscriptionPrice = (): number => {
+  return config.subscriptionPrice;
+};
+
+export const getSubscriptionCurrency = (): string => {
+  return config.subscriptionCurrency;
 };
 
 export default config;
