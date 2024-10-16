@@ -12,7 +12,7 @@ import Stripe from "stripe"; // Import the Stripe types
 
 // Use the webhook secret from config instead of directly from process.env
 const webhookSecret = config.stripeWebhookSecret; // Retrieve the webhook secret from the configuration
-console.log(`Webhook secret: ${webhookSecret}`); // Log the webhook secret for debugging purposes
+console.log(`Webhook secret: ${config.isTestMode ? webhookSecret : "****"}`); // Log the webhook secret for debugging purposes, masking it in live mode
 
 const log = (
   message: string,
