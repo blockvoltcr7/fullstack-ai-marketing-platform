@@ -13,6 +13,11 @@ interface ProjectPageProps {
 export default async function ProjectPage({ params }: ProjectPageProps) {
   console.log(`ProjectPage: Attempting to fetch project ${params.projectId}`);
 
+  if (!params.projectId) {
+    console.error(`ProjectPage: Project ID is undefined`);
+    return notFound();
+  }
+
   try {
     const project = await getProject(params.projectId);
     const subscription = await getUserSubscription();
