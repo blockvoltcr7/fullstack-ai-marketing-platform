@@ -8,6 +8,7 @@ import {
   Template,
   templatesTable,
   subscriptionsTable,
+  stripeCustomersTable,
 } from "./db/schema";
 import { eq } from "drizzle-orm";
 import Stripe from "stripe";
@@ -117,4 +118,28 @@ export async function getUserSubscription(): Promise<Stripe.Subscription | null>
     console.error("Error fetching subscription from Stripe:", error);
     throw new Error("Failed to retrieve subscription details.");
   }
+}
+
+export async function deleteUser(userId: string): Promise<void> {
+  // Verify the user exists
+  const { userId: authUserId } = auth();
+  if (!authUserId) {
+    throw new Error("Unauthorized");
+  }
+
+  await db.transaction(async (tx) => {
+    // Delete from the subscriptions table first
+    await tx
+      .delete(subscriptionsTable)
+      .where(eq(subscriptionsTable.userId, userId));
+
+    // Delete from the stripe_customers table
+    await tx
+      .delete(stripeCustomersTable)
+      .where(eq(stripeCustomersTable.userId, userId));
+  });
+
+  console.log(
+    `User ${userId} has been deleted from subscriptions and stripe_customers tables.`
+  );
 }
