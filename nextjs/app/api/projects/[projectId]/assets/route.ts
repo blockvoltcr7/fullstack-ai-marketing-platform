@@ -10,6 +10,7 @@ export async function GET(
   { params }: { params: { projectId: string } }
 ) {
   const { projectId } = params;
+  console.log(`[API] Fetching assets for project ${projectId}`);
 
   // Auth check
   const { userId } = getAuth(request);
@@ -24,9 +25,15 @@ export async function GET(
       .where(eq(assetTable.projectId, projectId))
       .execute();
 
+    console.log(`[API] Found ${assets.length} assets for project ${projectId}`);
+    console.log(`[API] Assets:`, assets);
+
     return NextResponse.json(assets);
   } catch (error) {
-    console.error("Failed to fetch assets", error);
+    console.error(
+      `[API] Error fetching assets for project ${projectId}:`,
+      error
+    );
     return NextResponse.json(
       { error: "Failed to fetch assets" },
       { status: 500 }
