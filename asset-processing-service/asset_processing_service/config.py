@@ -50,7 +50,18 @@ class Config:
         OPENAI_MODEL (str): OpenAI model to use for processing.
     """
 
-    API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:3000/api")
+    # Use a single environment variable to determine the mode
+    IS_PRODUCTION = os.getenv("ENVIRONMENT", "development").lower() == "production"
+
+    # Base configuration
+    API_BASE_URL = os.getenv(
+        "API_BASE_URL",
+        (
+            "https://fullstack-ai-marketing-platform-bice.vercel.app/"
+            if IS_PRODUCTION
+            else "http://localhost:3000/api"
+        ),
+    )
     SERVER_API_KEY = get_required_env("SERVER_API_KEY")
     STUCK_JOB_THRESHOLD_SECONDS = int(os.getenv("STUCK_JOB_THRESHOLD_SECONDS", "30"))
     MAX_JOB_ATTEMPTS = int(os.getenv("MAX_JOB_ATTEMPTS", "3"))

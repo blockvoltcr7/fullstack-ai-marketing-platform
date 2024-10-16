@@ -151,14 +151,13 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
   useEffect(() => {
     let newErrorMessage = null;
 
-    if (!projectHasContent || !projectHasPrompts) {
-      const missingItems = [];
-      if (!projectHasContent) missingItems.push("valid assets");
-      if (!projectHasPrompts) missingItems.push("add prompts");
-
-      newErrorMessage = `Please ${missingItems.join(
-        " and "
-      )} before generating content.`;
+    if (!projectHasContent && !projectHasPrompts) {
+      newErrorMessage =
+        "Please add valid assets and prompts before generating content.";
+    } else if (!projectHasContent) {
+      newErrorMessage = "Please add valid assets before generating content.";
+    } else if (!projectHasPrompts) {
+      newErrorMessage = "Please add prompts before generating content.";
     } else if (isAssetsTokenExceeded || isPromptsTokenExceeded) {
       const exceededItems = [];
       if (isAssetsTokenExceeded) exceededItems.push("assets");
@@ -172,6 +171,13 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
     }
 
     setErrorMessage(newErrorMessage);
+    console.log("[GenerateContentStep] Error message set:", newErrorMessage);
+    console.log("[GenerateContentStep] Project state:", {
+      projectHasContent,
+      projectHasPrompts,
+      isAssetsTokenExceeded,
+      isPromptsTokenExceeded,
+    });
   }, [
     isAssetsTokenExceeded,
     isPromptsTokenExceeded,
