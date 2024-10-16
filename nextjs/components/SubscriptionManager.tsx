@@ -38,6 +38,7 @@ import { Button } from "./ui/button";
 import { Box, LayoutTemplate, Star } from "lucide-react";
 import toast from "react-hot-toast";
 import { useRouter, useSearchParams } from "next/navigation";
+import { getSubscriptionPrice, getSubscriptionCurrency } from "@/lib/config";
 
 /**
  * Interface for the props of the SubscriptionManager component.
@@ -123,6 +124,9 @@ function SubscriptionBody({
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  const subscriptionPrice = getSubscriptionPrice();
+  const subscriptionCurrency = getSubscriptionCurrency();
 
   // Handle the checkout process
   const handleCheckout = async () => {
@@ -232,7 +236,9 @@ function SubscriptionBody({
           disabled={isLoading}
           className="w-full sm:w-auto mt-4 sm:mt-6"
         >
-          {isLoading ? "Processing..." : "Subscribe Now - $14.99"}
+          {isLoading
+            ? "Processing..."
+            : `Subscribe Now - ${subscriptionCurrency} ${subscriptionPrice.toFixed(2)}`}
         </Button>
       </div>
     </div>
