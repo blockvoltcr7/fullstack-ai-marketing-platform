@@ -6,19 +6,19 @@ import React from "react";
 
 interface ProjectPageProps {
   params: {
-    projectId: string;
+    projectid: string;
   };
 }
 
 export default async function ProjectPage({ params }: ProjectPageProps) {
   console.log(`ProjectPage: Received params`, params);
 
-  if (!params || !params.projectId) {
+  if (!params || !params.projectid) {
     console.error(`ProjectPage: Project ID is undefined or missing`);
     return notFound();
   }
 
-  const projectId = params.projectId;
+  const projectId = params.projectid;
   console.log(`ProjectPage: Attempting to fetch project ${projectId}`);
 
   try {

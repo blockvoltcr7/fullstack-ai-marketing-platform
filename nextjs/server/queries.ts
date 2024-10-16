@@ -65,6 +65,10 @@ export async function getProject(projectId: string) {
       );
     } else {
       console.log(`getProject: Project ${projectId} found for user ${userId}`);
+      console.log(
+        `getProject: Verifying project details:`,
+        JSON.stringify(project, null, 2)
+      );
     }
 
     return project;
