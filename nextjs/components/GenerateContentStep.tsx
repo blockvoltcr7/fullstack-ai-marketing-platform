@@ -49,6 +49,9 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
   useEffect(() => {
     const fetchAllProjectData = async () => {
       setIsLoading(true);
+      console.log(
+        `[GenerateContentStep] Fetching data for project ${projectId}`
+      );
 
       try {
         const [generatedContentResponse, assetsResponse, promptsResponse] =
@@ -60,16 +63,36 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
             axios.get<Prompt[]>(`/api/projects/${projectId}/prompts`),
           ]);
 
+        console.log(
+          `[GenerateContentStep] Generated content:`,
+          generatedContentResponse.data
+        );
+        console.log(`[GenerateContentStep] Assets:`, assetsResponse.data);
+        console.log(`[GenerateContentStep] Prompts:`, promptsResponse.data);
+
         setGeneratedContent(generatedContentResponse.data);
         setGeneratedCount(generatedContentResponse.data.length);
 
-        setProjectHasContent(
-          assetsResponse.data.some(
-            (asset) => asset.content && asset.content.trim().length > 0
-          )
+        const hasValidContent = assetsResponse.data.some(
+          (asset) => asset.content && asset.content.trim().length > 0
         );
+        console.log(
+          `[GenerateContentStep] Project has valid content: ${hasValidContent}`
+        );
+        setProjectHasContent(hasValidContent);
 
-        setProjectHasPrompts(promptsResponse.data.length > 0);
+        if (!hasValidContent) {
+          console.log(
+            `[GenerateContentStep] Assets without valid content:`,
+            assetsResponse.data.filter(
+              (asset) => !asset.content || asset.content.trim().length === 0
+            )
+          );
+        }
+
+        const hasPrompts = promptsResponse.data.length > 0;
+        console.log(`[GenerateContentStep] Project has prompts: ${hasPrompts}`);
+        setProjectHasPrompts(hasPrompts);
         setTotalPrompts(promptsResponse.data.length);
 
         // Check to make sure we don't exceed asset token limits
@@ -77,22 +100,48 @@ function GenerateContentStep({ projectId }: GenerateContentStepProps) {
         for (const asset of assetsResponse.data) {
           totalTokenCount += asset.tokenCount ?? 0;
         }
-        setIsAssetsTokenExceeded(totalTokenCount > MAX_TOKENS_ASSETS);
+        const assetsExceedTokens = totalTokenCount > MAX_TOKENS_ASSETS;
+        console.log(
+          `[GenerateContentStep] Total asset tokens: ${totalTokenCount}, Limit: ${MAX_TOKENS_ASSETS}, Exceeded: ${assetsExceedTokens}`
+        );
+        setIsAssetsTokenExceeded(assetsExceedTokens);
 
         // Check to make sure we don't exceed prompt token limits
+        let promptsExceedTokens = false;
         for (const prompt of promptsResponse.data) {
           if ((prompt?.tokenCount ?? 0) > MAX_TOKENS_PROMPT) {
-            setIsPromptsTokenExceeded(true);
+            promptsExceedTokens = true;
+            console.log(
+              `[GenerateContentStep] Prompt exceeds token limit:`,
+              prompt
+            );
             break;
           }
         }
+        console.log(
+          `[GenerateContentStep] Prompts exceed token limit: ${promptsExceedTokens}`
+        );
+        setIsPromptsTokenExceeded(promptsExceedTokens);
       } catch (error) {
+        console.error(
+          `[GenerateContentStep] Error fetching project data:`,
+          error
+        );
+        if (axios.isAxiosError(error)) {
+          console.error(`[GenerateContentStep] Axios error details:`, {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status,
+          });
+        }
         toast.error("Failed to fetch project data");
         setProjectHasContent(false);
         setProjectHasPrompts(false);
-        console.error(error);
       } finally {
         setIsLoading(false);
+        console.log(
+          `[GenerateContentStep] Finished fetching data for project ${projectId}`
+        );
       }
     };
 
