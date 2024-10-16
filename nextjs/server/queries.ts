@@ -33,6 +33,11 @@ export function getProjectsForUser(): Promise<Project[]> {
 }
 
 export async function getProject(projectId: string) {
+  if (!projectId) {
+    console.error("getProject: Project ID is undefined");
+    return null;
+  }
+
   // Figure out who the user is
   const { userId } = auth();
 
