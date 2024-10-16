@@ -38,13 +38,24 @@ export async function getProject(projectId: string) {
 
   // Verify the user exists
   if (!userId) {
+    console.error("getProject: User not found");
     throw new Error("User not found");
   }
+
+  console.log(`getProject: Fetching project ${projectId} for user ${userId}`);
 
   const project = await db.query.projectsTable.findFirst({
     where: (project, { eq, and }) =>
       and(eq(project.id, projectId), eq(project.userId, userId)),
   });
+
+  if (!project) {
+    console.error(
+      `getProject: Project ${projectId} not found for user ${userId}`
+    );
+  } else {
+    console.log(`getProject: Project ${projectId} found for user ${userId}`);
+  }
 
   return project;
 }
