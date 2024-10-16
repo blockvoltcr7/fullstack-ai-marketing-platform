@@ -33,13 +33,17 @@ export function getProjectsForUser(): Promise<Project[]> {
 }
 
 export async function getProject(projectId: string) {
+  console.log(`getProject: Received projectId: ${projectId}`);
+
   if (!projectId) {
-    console.error("getProject: Project ID is undefined");
+    console.error("getProject: Project ID is undefined or empty");
     return null;
   }
 
   // Figure out who the user is
   const { userId } = auth();
+
+  console.log(`getProject: Authenticated userId: ${userId}`);
 
   // Verify the user exists
   if (!userId) {
@@ -49,20 +53,25 @@ export async function getProject(projectId: string) {
 
   console.log(`getProject: Fetching project ${projectId} for user ${userId}`);
 
-  const project = await db.query.projectsTable.findFirst({
-    where: (project, { eq, and }) =>
-      and(eq(project.id, projectId), eq(project.userId, userId)),
-  });
+  try {
+    const project = await db.query.projectsTable.findFirst({
+      where: (project, { eq, and }) =>
+        and(eq(project.id, projectId), eq(project.userId, userId)),
+    });
 
-  if (!project) {
-    console.error(
-      `getProject: Project ${projectId} not found for user ${userId}`
-    );
-  } else {
-    console.log(`getProject: Project ${projectId} found for user ${userId}`);
+    if (!project) {
+      console.error(
+        `getProject: Project ${projectId} not found for user ${userId}`
+      );
+    } else {
+      console.log(`getProject: Project ${projectId} found for user ${userId}`);
+    }
+
+    return project;
+  } catch (error) {
+    console.error(`getProject: Error fetching project:`, error);
+    throw error;
   }
-
-  return project;
 }
 
 export async function getTemplatesForUser(): Promise<Template[]> {
